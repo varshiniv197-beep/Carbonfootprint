@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { sanitizeInput, validatePassword, generateCsrfToken } from '@/utils/security';
+import { sanitizeInput, validatePassword, generateCsrfToken, hashPassword } from '@/utils/security';
 import { Shield, Lock, User, AlertCircle, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
@@ -54,7 +54,8 @@ export default function LoginPage() {
         return;
       }
       
-      const success = await register(cleanUsername, cleanPassword);
+      const hashedPassword = await hashPassword(cleanPassword);
+      const success = await register(cleanUsername, hashedPassword);
       if (!success) {
         setError('Username already exists.');
         setLoading(false);
@@ -62,7 +63,8 @@ export default function LoginPage() {
       }
       router.push('/calculator');
     } else {
-      const success = await login(cleanUsername, cleanPassword);
+      const hashedPassword = await hashPassword(cleanPassword);
+      const success = await login(cleanUsername, hashedPassword);
       if (!success) {
         setError('Invalid credentials.');
         setLoading(false);

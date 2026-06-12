@@ -1,7 +1,7 @@
 /**
  * Security Utility Helpers for TerraSync AI+
  * Provides client-side defense in depth including input sanitization, 
- * secure local storage management, and CSRF simulation.
+ * secure local storage management, and SHA-256 cryptographic hashing.
  */
 
 // Simple client-side XSS sanitizer
@@ -39,4 +39,23 @@ export function validatePassword(password: string): { isValid: boolean; feedback
     return { isValid: false, feedback: 'Password must contain at least one number.' };
   }
   return { isValid: true, feedback: 'Strong password.' };
+}
+
+// Client-side secure SHA-256 Password hashing using Web Crypto API
+export async function hashPassword(password: string): Promise<string> {
+  if (typeof window === 'undefined' || !window.crypto || !window.crypto.subtle) {
+    // Fallback for tests / non-browser environments using simple character hashing
+    let hash = 0;
+    for (let i = 0; i < password.length; i++) {
+      const char = password.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash |= 0;
+    }
+    return 'fallback_' + Math.abs(hash).toString(16);
+  }
+
+  const msgBuffer = new TextEncoder().encode(password);
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
 }
