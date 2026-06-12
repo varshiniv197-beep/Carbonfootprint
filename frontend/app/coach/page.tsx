@@ -49,13 +49,13 @@ export default function CoachPage() {
           <Bot className="w-8 h-8 text-emerald-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Guided AI Sustainability Coach</h1>
-          <p className="text-slate-400">Ask structured questions to get automated offsets guidance.</p>
+          <h1 className="text-3xl font-bold text-white">Guided AI Sustainability Coach</h1>
+          <p className="text-slate-200">Ask structured questions to get automated offsets guidance.</p>
         </div>
       </div>
 
       {/* Chat Messages Frame */}
-      <div className="flex-1 bg-slate-900/40 border border-slate-800/85 rounded-3xl flex flex-col overflow-hidden mb-6 min-h-[300px]">
+      <div className="flex-1 bg-slate-900/40 border border-slate-800/85 rounded-3xl flex flex-col overflow-hidden mb-6 min-h-[300px]" role="log" aria-live="polite">
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((msg, idx) => (
             <div key={idx} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
@@ -76,7 +76,7 @@ export default function CoachPage() {
 
       {/* Guided Questions Layout */}
       <div className="space-y-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-200 flex items-center gap-1.5">
           <MessageSquare className="w-4 h-4" /> Select an inquiry scenario
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -84,13 +84,14 @@ export default function CoachPage() {
             <button
               key={idx}
               onClick={() => handleSelectQuestion(gq.question, gq.response)}
-              className="text-left p-4 bg-slate-900 border border-slate-800 rounded-2xl hover:border-emerald-500/50 hover:bg-slate-800/40 text-sm text-slate-300 hover:text-white font-medium transition-all"
+              className="text-left p-4 bg-slate-900 border border-slate-800 rounded-2xl hover:border-emerald-500/50 hover:bg-slate-800/40 focus-visible:ring-2 focus-visible:ring-emerald-500 outline-none text-sm text-slate-200 hover:text-white font-medium transition-all"
             >
               {gq.question}
             </button>
           ))}
         </div>
       </div>
+
 
     </div>
   );

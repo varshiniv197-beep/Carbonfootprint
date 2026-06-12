@@ -1,13 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getUsers, saveUser, findUser, UserAccount } from '@/utils/db';
-
-interface FootprintData {
-  transport: number;
-  energy: number;
-  diet: number;
-  habits: number;
-}
+import { 
+  FootprintData, 
+  computeSustainabilityScore, 
+  mapScoreToLevel 
+} from '@/utils/carbon';
 
 interface UserState {
   name: string;
@@ -47,16 +45,10 @@ export const useStore = create<UserState>()(
         const state = get();
         const newData = { ...state.footprintData, ...data };
         
-        // Compute Carbon Score
+        // Compute Carbon Score using shared engine
         const total = newData.transport + newData.energy + newData.diet + newData.habits;
-        let newScore = 100;
-        if (total > 200) newScore = 30;
-        else if (total > 150) newScore = 50;
-        else if (total > 100) newScore = 70;
-        else if (total > 50) newScore = 85;
-        else if (total > 0) newScore = 95;
-
-        const newLevel = newScore > 80 ? 'Climate Champion' : newScore > 50 ? 'Eco Advocate' : 'Green Cadet';
+        const newScore = computeSustainabilityScore(total);
+        const newLevel = mapScoreToLevel(newScore);
 
         set({
           footprintData: newData,
@@ -66,7 +58,6 @@ export const useStore = create<UserState>()(
 
         if (state.isLoggedIn && state.name) {
           if (state.isOfflineMode) {
-            // Offline sync directly
             const user = findUser(state.name);
             if (user) {
               user.footprintData = newData;
@@ -82,7 +73,6 @@ export const useStore = create<UserState>()(
               });
               if (!res.ok) throw new Error('API Sync failed');
             } catch (e) {
-              // Fallback to local DB cache
               const user = findUser(state.name);
               if (user) {
                 user.footprintData = newData;
@@ -161,7 +151,6 @@ export const useStore = create<UserState>()(
             return { success: true };
           } else {
             const errData = await res.json().catch(() => ({}));
-            // If server-side database error, fallback to local DB instantly
             if (res.status === 500 || errData.error === 'Database Connection Error') {
               console.warn('MongoDB offline, falling back to Local DB cache.');
               return get().localLoginFallback(name, passwordHash);
@@ -169,7 +158,6 @@ export const useStore = create<UserState>()(
             return { success: false, error: errData.error || 'Authentication failed' };
           }
         } catch (e) {
-          // Network fail
           return get().localLoginFallback(name, passwordHash);
         }
       },
@@ -195,7 +183,6 @@ export const useStore = create<UserState>()(
             return { success: true };
           } else {
             const errData = await res.json().catch(() => ({}));
-            // If server-side database error, fallback to local DB instantly
             if (res.status === 500 || errData.error === 'Database Connection Error') {
               console.warn('MongoDB offline, falling back to Local DB cache.');
               return get().localRegisterFallback(name, passwordHash);
@@ -203,7 +190,6 @@ export const useStore = create<UserState>()(
             return { success: false, error: errData.error || 'Registration failed' };
           }
         } catch (e) {
-          // Network fail
           return get().localRegisterFallback(name, passwordHash);
         }
       },

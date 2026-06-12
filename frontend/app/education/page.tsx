@@ -22,8 +22,12 @@ export default function EducationPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {articles.map((article, idx) => (
-          <div key={idx} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col hover:border-cyan-500/50 transition-colors cursor-pointer group">
-            <div className="flex justify-between items-start mb-4">
+          <button 
+            key={idx} 
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col hover:border-cyan-500/50 transition-colors cursor-pointer group text-left w-full focus-visible:ring-2 focus-visible:ring-cyan-500 outline-none"
+            aria-label={`Read article: ${article.title}. Category: ${article.category}. Earn ${article.points} XP.`}
+          >
+            <div className="flex justify-between items-start mb-4 w-full">
               <span className="bg-cyan-500/10 text-cyan-400 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
                 {article.category}
               </span>
@@ -32,20 +36,21 @@ export default function EducationPage() {
               </span>
             </div>
             
-            <h2 className="text-xl font-bold mb-2 group-hover:text-cyan-400 transition-colors">{article.title}</h2>
-            <p className="text-sm text-slate-400 mb-6 flex-1">
+            <h2 className="text-xl font-bold mb-2 text-white group-hover:text-cyan-400 transition-colors">{article.title}</h2>
+            <p className="text-sm text-slate-200 mb-6 flex-1">
               Learn actionable insights about how {article.category.toLowerCase()} affects your carbon footprint and the UN Sustainable Development Goals.
             </p>
             
-            <div className="flex items-center justify-between mt-auto">
-              <span className="text-sm text-slate-500">{article.time}</span>
+            <div className="flex items-center justify-between mt-auto w-full">
+              <span className="text-sm text-slate-300">{article.time}</span>
               <span className="text-cyan-400 flex items-center gap-1 text-sm font-bold group-hover:translate-x-1 transition-transform">
                 Read Article <ArrowRight className="w-4 h-4" />
               </span>
             </div>
-          </div>
+          </button>
         ))}
       </div>
+
     </div>
   );
 }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node scripts/test-runner.js"
+    "test": "npx tsc utils/carbon.ts utils/security.ts --outDir dist --target es6 --module commonjs --esModuleInterop && node scripts/test-runner.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",

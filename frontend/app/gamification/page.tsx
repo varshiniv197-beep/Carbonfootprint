@@ -23,8 +23,8 @@ export default function GamificationPage() {
           <Trophy className="w-8 h-8 text-amber-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Gamification & Community Leaderboard</h1>
-          <p className="text-slate-400">Complete challenges, improve your score, and rise up the rankings.</p>
+          <h1 className="text-3xl font-bold text-white">Gamification & Community Leaderboard</h1>
+          <p className="text-slate-200">Complete challenges, improve your score, and rise up the rankings.</p>
         </div>
       </div>
 
@@ -34,12 +34,13 @@ export default function GamificationPage() {
         <div className="lg:col-span-1 bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 text-center flex flex-col items-center justify-center relative overflow-hidden">
           <div className="absolute -top-10 -left-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl"></div>
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-4 shadow-lg shadow-orange-500/20">
-            <Trophy className="w-10 h-10 text-white" />
+             <Trophy className="w-10 h-10 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-white">{isLoggedIn && name ? name : 'Eco Guest'}</h2>
           <p className="text-emerald-400 font-semibold mt-1">{level}</p>
-          <div className="text-5xl font-black text-white mt-4">{score} <span className="text-lg text-slate-500">XP</span></div>
+          <div className="text-5xl font-black text-white mt-4">{score} <span className="text-lg text-slate-350">XP</span></div>
         </div>
+
 
         {/* Right Columns: Leaderboard Table */}
         <div className="lg:col-span-2 bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 shadow-xl">
@@ -49,13 +50,14 @@ export default function GamificationPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
-                  <th className="pb-3 pl-2">Rank</th>
-                  <th className="pb-3">User</th>
-                  <th className="pb-3">Score (XP)</th>
-                  <th className="pb-3">Level</th>
+                <tr className="border-b border-slate-800 text-slate-200 text-xs font-semibold uppercase tracking-wider">
+                  <th className="pb-3 pl-2" scope="col">Rank</th>
+                  <th className="pb-3" scope="col">User</th>
+                  <th className="pb-3" scope="col">Score (XP)</th>
+                  <th className="pb-3" scope="col">Level</th>
                 </tr>
               </thead>
+
               <tbody>
                 {mockLeaderboard.map((user, idx) => (
                   <tr 

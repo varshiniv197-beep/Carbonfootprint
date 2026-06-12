@@ -118,39 +118,42 @@ export default function LoginPage() {
           <input type="hidden" name="csrf_token" value={csrfToken} />
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Username</label>
+            <label htmlFor="username-input" className="block text-xs font-semibold uppercase tracking-wider text-slate-200 mb-2">Username</label>
             <div className="relative">
-              <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-500" />
+              <User className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
               <input 
+                id="username-input"
                 type="text" 
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. eco_warrior"
-                className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/80 transition-colors"
+                className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/80 focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
                 disabled={loading}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Password</label>
+            <label htmlFor="password-input" className="block text-xs font-semibold uppercase tracking-wider text-slate-200 mb-2">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-500" />
+              <Lock className="absolute left-3 top-3.5 w-5 h-5 text-slate-400" />
               <input 
+                id="password-input"
                 type="password" 
                 value={password}
                 onChange={handlePasswordChange}
                 placeholder="••••••••"
-                className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/80 transition-colors"
+                className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/80 focus-visible:ring-2 focus-visible:ring-emerald-500 transition-colors"
                 disabled={loading}
               />
             </div>
             {activeTab === 'register' && strengthMessage && (
-              <p className={`text-xs mt-2 font-medium ${strengthMessage.includes('Strong') ? 'text-emerald-400' : 'text-amber-400'}`}>
+              <p className={`text-xs mt-2 font-medium ${strengthMessage.includes('Strong') ? 'text-emerald-400' : 'text-amber-400'}`} aria-live="polite">
                 {strengthMessage}
               </p>
             )}
           </div>
+
 
           <button 
             type="submit"
