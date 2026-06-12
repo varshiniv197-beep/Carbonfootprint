@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌍 EcoTrack AI
+# 🌍 TerraSync AI
 ### The Ultimate AI-Powered Carbon Footprint Awareness Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
@@ -10,7 +10,7 @@
 [![Gemini AI](https://img.shields.io/badge/AI-Gemini-orange?style=for-the-badge&logo=google)](https://deepmind.google/technologies/gemini/)
 [![Docker](https://img.shields.io/badge/Docker-Enabled-blue?style=for-the-badge&logo=docker)](https://www.docker.com/)
 
-[![CI](https://github.com/vasanth-1208/ecotrack_ai_/actions/workflows/ci.yml/badge.svg)](https://github.com/vasanth-1208/ecotrack_ai_/actions)
+[![CI](https://github.com/vasanth-1208/TerraSync_ai_/actions/workflows/ci.yml/badge.svg)](https://github.com/vasanth-1208/TerraSync_ai_/actions)
 [![PWA Ready](https://img.shields.io/badge/PWA-Ready-success?style=flat-square)](#)
 [![Coverage](https://img.shields.io/badge/Test_Coverage-80%25-success?style=flat-square)](#)
 [![Accessibility](https://img.shields.io/badge/WCAG-2.1-success?style=flat-square)](#)
@@ -21,9 +21,9 @@
 
 ---
 
-## 🏆 Why EcoTrack AI Stands Out
+## 🏆 Why TerraSync AI Stands Out
 
-EcoTrack AI goes beyond being a simple carbon footprint calculator. It is a fully integrated, intelligent sustainability ecosystem that combines **Artificial Intelligence, behavioral science, and predictive analytics** to drive real-world climate action. 
+TerraSync AI goes beyond being a simple carbon footprint calculator. It is a fully integrated, intelligent sustainability ecosystem that combines **Artificial Intelligence, behavioral science, and predictive analytics** to drive real-world climate action. 
 
 > *"Measurement leads to management. Intelligence leads to action."*
 
@@ -41,7 +41,7 @@ EcoTrack AI goes beyond being a simple carbon footprint calculator. It is a full
 
 ## 🏗️ Software Architecture & Code Quality
 
-EcoTrack AI leverages a highly scalable, decoupled layer architecture ensuring maintainability, testability, and a clear separation of concerns.
+TerraSync AI leverages a highly scalable, decoupled layer architecture ensuring maintainability, testability, and a clear separation of concerns.
 
 ```mermaid
 graph TD
@@ -68,7 +68,7 @@ Security is baked into the foundation. It is explicitly hardened and easily audi
 
 ## 🌍 Real-World Impact & UN Alignment
 
-EcoTrack AI transforms awareness into measurable outcomes. We directly map our platform's actions to the **United Nations Sustainable Development Goals (SDGs)**:
+TerraSync AI transforms awareness into measurable outcomes. We directly map our platform's actions to the **United Nations Sustainable Development Goals (SDGs)**:
 
 | SDG Mission | Application Feature & Outcome | Estimated Annual Impact |
 | :--- | :--- | :--- |
