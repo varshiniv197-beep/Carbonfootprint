@@ -16,12 +16,12 @@ interface UserState {
   footprintData: FootprintData;
   isLoggedIn: boolean;
   hasCalculated: boolean;
-  setFootprintData: (data: Partial<FootprintData>) => void;
+  setFootprintData: (data: Partial<FootprintData>) => Promise<void>;
   addPoints: (points: number) => void;
-  login: (name: string) => boolean;
-  register: (name: string, passwordHash: string) => boolean;
+  login: (name: string, passwordHash: string) => Promise<boolean>;
+  register: (name: string, passwordHash: string) => Promise<boolean>;
   logout: () => void;
-  completeCalculator: () => void;
+  completeCalculator: () => Promise<void>;
 }
 
 export const useStore = create<UserState>()(
@@ -38,23 +38,39 @@ export const useStore = create<UserState>()(
       },
       isLoggedIn: false,
       hasCalculated: false,
-      setFootprintData: (data) => {
-        set((state) => {
-          const newData = { ...state.footprintData, ...data };
-          
-          // Calculate score based on total emissions
-          const total = newData.transport + newData.energy + newData.diet + newData.habits;
-          let newScore = 100;
-          if (total > 200) newScore = 30;
-          else if (total > 150) newScore = 50;
-          else if (total > 100) newScore = 70;
-          else if (total > 50) newScore = 85;
-          else if (total > 0) newScore = 95;
+      
+      setFootprintData: async (data) => {
+        const state = get();
+        const newData = { ...state.footprintData, ...data };
+        
+        // Compute Carbon Score
+        const total = newData.transport + newData.energy + newData.diet + newData.habits;
+        let newScore = 100;
+        if (total > 200) newScore = 30;
+        else if (total > 150) newScore = 50;
+        else if (total > 100) newScore = 70;
+        else if (total > 50) newScore = 85;
+        else if (total > 0) newScore = 95;
 
-          const newLevel = newScore > 80 ? 'Climate Champion' : newScore > 50 ? 'Eco Advocate' : 'Green Cadet';
+        const newLevel = newScore > 80 ? 'Climate Champion' : newScore > 50 ? 'Eco Advocate' : 'Green Cadet';
 
-          // Sync to db if logged in
-          if (state.isLoggedIn && state.name) {
+        set({
+          footprintData: newData,
+          score: newScore,
+          level: newLevel
+        });
+
+        // Sync to MongoDB serverless API with local DB fallback
+        if (state.isLoggedIn && state.name) {
+          try {
+            const res = await fetch('/api/footprint', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: state.name, footprintData: newData, score: newScore })
+            });
+            if (!res.ok) throw new Error('API Sync failed');
+          } catch (e) {
+            // Fallback to local DB
             const user = findUser(state.name);
             if (user) {
               user.footprintData = newData;
@@ -62,55 +78,93 @@ export const useStore = create<UserState>()(
               saveUser(user);
             }
           }
-
-          return {
-            footprintData: newData,
-            score: newScore,
-            level: newLevel
-          };
-        });
+        }
       },
+
       addPoints: (points) =>
         set((state) => ({
           score: Math.min(100, state.score + points),
         })),
-      login: (name) => {
-        const user = findUser(name);
-        if (user) {
-          set({
-            isLoggedIn: true,
-            name: user.username,
-            hasCalculated: user.hasCalculated,
-            footprintData: user.footprintData,
-            score: user.score
+
+      login: async (name, passwordHash) => {
+        try {
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: name, password: passwordHash })
           });
-          return true;
+          if (res.ok) {
+            const data = await res.json();
+            set({
+              isLoggedIn: true,
+              name: data.username,
+              hasCalculated: data.hasCalculated,
+              footprintData: data.footprintData,
+              score: data.score
+            });
+            return true;
+          }
+        } catch (e) {
+          // Fallback to local DB
+          const user = findUser(name);
+          if (user && user.passwordHash === passwordHash) {
+            set({
+              isLoggedIn: true,
+              name: user.username,
+              hasCalculated: user.hasCalculated,
+              footprintData: user.footprintData,
+              score: user.score
+            });
+            return true;
+          }
         }
         return false;
       },
-      register: (name, passwordHash) => {
-        const existing = findUser(name);
-        if (existing) return false;
 
-        const newUser: UserAccount = {
-          username: name,
-          passwordHash,
-          hasCalculated: false,
-          score: 0,
-          footprintData: { transport: 0, energy: 0, diet: 0, habits: 0 }
-        };
-        saveUser(newUser);
-        
-        set({
-          isLoggedIn: true,
-          name,
-          hasCalculated: false,
-          footprintData: { transport: 0, energy: 0, diet: 0, habits: 0 },
-          score: 0,
-          level: 'Novice'
-        });
-        return true;
+      register: async (name, passwordHash) => {
+        try {
+          const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: name, password: passwordHash })
+          });
+          if (res.ok) {
+            set({
+              isLoggedIn: true,
+              name,
+              hasCalculated: false,
+              footprintData: { transport: 0, energy: 0, diet: 0, habits: 0 },
+              score: 0,
+              level: 'Novice'
+            });
+            return true;
+          }
+        } catch (e) {
+          // Fallback to local DB
+          const existing = findUser(name);
+          if (!existing) {
+            const newUser: UserAccount = {
+              username: name,
+              passwordHash,
+              hasCalculated: false,
+              score: 0,
+              footprintData: { transport: 0, energy: 0, diet: 0, habits: 0 }
+            };
+            saveUser(newUser);
+            set({
+              isLoggedIn: true,
+              name,
+              hasCalculated: false,
+              footprintData: { transport: 0, energy: 0, diet: 0, habits: 0 },
+              score: 0,
+              level: 'Novice'
+            });
+            return true;
+          }
+        }
+        return false;
       },
+
       logout: () =>
         set({
           isLoggedIn: false,
@@ -120,17 +174,27 @@ export const useStore = create<UserState>()(
           score: 0,
           level: 'Novice'
         }),
-      completeCalculator: () => {
-        set((state) => {
-          if (state.isLoggedIn && state.name) {
+
+      completeCalculator: async () => {
+        const state = get();
+        set({ hasCalculated: true });
+        
+        if (state.isLoggedIn && state.name) {
+          try {
+            await fetch('/api/footprint', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username: state.name, footprintData: state.footprintData, score: state.score })
+            });
+          } catch (e) {
+            // Fallback to local DB
             const user = findUser(state.name);
             if (user) {
               user.hasCalculated = true;
               saveUser(user);
             }
           }
-          return { hasCalculated: true };
-        });
+        }
       }
     }),
     {

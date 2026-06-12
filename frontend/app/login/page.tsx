@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [csrfToken, setCsrfToken] = useState('');
   const [error, setError] = useState('');
   const [strengthMessage, setStrengthMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setCsrfToken(generateCsrfToken());
@@ -31,15 +32,17 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
 
     const cleanUsername = sanitizeInput(username.trim());
     const cleanPassword = password.trim();
 
     if (!cleanUsername || !cleanPassword) {
       setError('Please fill in all fields.');
+      setLoading(false);
       return;
     }
 
@@ -47,23 +50,27 @@ export default function LoginPage() {
       const passwordCheck = validatePassword(cleanPassword);
       if (!passwordCheck.isValid) {
         setError(passwordCheck.feedback);
+        setLoading(false);
         return;
       }
       
-      const success = register(cleanUsername, cleanPassword);
+      const success = await register(cleanUsername, cleanPassword);
       if (!success) {
         setError('Username already exists.');
+        setLoading(false);
         return;
       }
       router.push('/calculator');
     } else {
-      const success = login(cleanUsername);
+      const success = await login(cleanUsername, cleanPassword);
       if (!success) {
         setError('Invalid credentials.');
+        setLoading(false);
         return;
       }
       router.push('/dashboard');
     }
+    setLoading(false);
   };
 
   return (
@@ -118,6 +125,7 @@ export default function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="e.g. eco_warrior"
                 className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/80 transition-colors"
+                disabled={loading}
               />
             </div>
           </div>
@@ -132,6 +140,7 @@ export default function LoginPage() {
                 onChange={handlePasswordChange}
                 placeholder="••••••••"
                 className="w-full bg-slate-950/80 border border-slate-800/80 rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500/80 transition-colors"
+                disabled={loading}
               />
             </div>
             {activeTab === 'register' && strengthMessage && (
@@ -143,9 +152,12 @@ export default function LoginPage() {
 
           <button 
             type="submit"
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
           >
-            {activeTab === 'register' ? (
+            {loading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+            ) : activeTab === 'register' ? (
               <>
                 <Sparkles className="w-5 h-5" /> Start Journey
               </>

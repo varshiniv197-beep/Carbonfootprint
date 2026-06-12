@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'export',
-  distDir: 'out',
+  // Configured for dynamic serverless hosting to enable MongoDB API endpoints
 };
 export default nextConfig;
