@@ -41,6 +41,69 @@ TerraSync AI+ is a full-stack, production-ready carbon footprint intelligence pl
 
 ---
 
+## 📐 Carbon Calculation Methodology
+
+Our platform uses standard EPA and IPCC carbon coefficients to calculate real-time emissions:
+
+$$\text{Footprint}_{\text{Transport}} = (\text{Car km} \times 0.2) + (\text{Transit hours} \times 0.1) + (\text{Flight hours} \times 110)$$
+$$\text{Footprint}_{\text{Energy}} = (\text{Electricity kWh} \times 0.4) + (\text{Heating Gas therms} \times 1.5) + (\text{Water Liters} \times 0.05)$$
+$$\text{Footprint}_{\text{Diet}} = (\text{Meat meals} \times 2.5) + (\text{Waste kg} \times 1.2) - (\text{Local Produce \%} \times 0.1)$$
+$$\text{Footprint}_{\text{Habits}} = (\text{Clothing Items} \times 15) - (\text{Recycled \%} \times 0.5) - (\text{Appliance Star Rating \%} \times 0.2)$$
+
+---
+
+## 📡 API Specification
+
+### 1. User Registration `[POST] /api/auth/register`
+* **Request:**
+  ```json
+  {
+    "username": "eco_pioneer",
+    "password": "hashed_sha256_string"
+  }
+  ```
+* **Response `(201 Created)`:**
+  ```json
+  {
+    "message": "Registration successful"
+  }
+  ```
+
+### 2. User Authentication `[POST] /api/auth/login`
+* **Request:**
+  ```json
+  {
+    "username": "eco_pioneer",
+    "password": "hashed_sha256_string"
+  }
+  ```
+* **Response `(200 OK)`:**
+  ```json
+  {
+    "username": "eco_pioneer",
+    "hasCalculated": true,
+    "score": 85,
+    "footprintData": {
+      "transport": 45.2,
+      "energy": 30.0,
+      "diet": 12.5,
+      "habits": 15.0
+    }
+  }
+  ```
+
+---
+
+## 🔒 Security Threat Model & Protections
+
+| Threat Scenario | Risk Level | Mitigation Control |
+| :--- | :--- | :--- |
+| **Plaintext Credential Exposure** | Critical | Client-side **SHA-256 Web Crypto hashing** ensures database intrusions never reveal raw user passwords. |
+| **Cross-Site Scripting (XSS)** | High | Output formatting is fully escaped using strict sanitization helper functions (`sanitizeInput`). |
+| **Cross-Site Request Forgery (CSRF)** | Medium | Forms generate dynamic random cryptographical tokens on component mount. |
+
+---
+
 ## 🚀 Enterprise Architecture (Roadmap Modules)
 
 *To demonstrate high enterprise scalability, the codebase is pre-configured to expand into the following modules:*
