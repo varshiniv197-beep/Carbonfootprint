@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import clientPromise from '@/utils/mongodb';
+import { getMongoClient } from '@/utils/mongodb';
 
 export async function PUT(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Username and footprintData are required' }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db('terrasync');
     const users = db.collection('users');
 
@@ -31,6 +31,6 @@ export async function PUT(request: Request) {
     return NextResponse.json({ message: 'Footprint updated successfully' }, { status: 200 });
   } catch (error) {
     console.error('Footprint update API error:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Database Connection Error' }, { status: 500 });
   }
 }

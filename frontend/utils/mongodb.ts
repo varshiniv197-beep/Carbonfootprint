@@ -3,26 +3,20 @@ import { MongoClient } from 'mongodb';
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/terrasync';
 const options = {};
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
+let client: MongoClient | null = null;
+let clientPromise: Promise<MongoClient> | null = null;
 
-if (!process.env.MONGODB_URI) {
-  console.warn('Warning: MONGODB_URI environment variable is not defined. Falling back to localhost.');
-}
+export async function getMongoClient(): Promise<MongoClient> {
+  if (client) return client;
 
-if (process.env.NODE_ENV === 'development') {
-  const globalWithMongo = global as typeof globalThis & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+  // Lazily connect inside request context to prevent Unhandled Promise Rejections at module load
+  if (!clientPromise) {
+    const mongoClient = new MongoClient(uri, options);
+    clientPromise = mongoClient.connect().then((connectedClient) => {
+      client = connectedClient;
+      return connectedClient;
+    });
   }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
 
-export default clientPromise;
+  return clientPromise;
+}
