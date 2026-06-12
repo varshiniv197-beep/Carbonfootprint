@@ -1,76 +1,89 @@
 'use client';
 import { useStore } from '@/store/useStore';
-import { Trophy, Medal, Target, Flame } from 'lucide-react';
+import { Trophy, Medal, Flame, Star } from 'lucide-react';
 
 export default function GamificationPage() {
-  const { score, level, name } = useStore();
+  const { score, level, name, isLoggedIn } = useStore();
+
+  // Dynamic Leaderboard list sorted in real-time
+  const mockLeaderboard = [
+    { username: 'Eco Champion', score: 98, level: 'Climate Champion' },
+    { username: 'Green Guru', score: 92, level: 'Climate Champion' },
+    { username: isLoggedIn && name ? name : 'Guest Warrior', score: score, level: level, isCurrentUser: true },
+    { username: 'Carbon Cutter', score: 75, level: 'Eco Advocate' },
+    { username: 'Rookie Offset', score: 45, level: 'Green Cadet' },
+  ].sort((a, b) => b.score - a.score);
 
   return (
-    <div className="p-6 md:p-12 max-w-6xl mx-auto">
-      <div className="flex items-center gap-4 mb-8">
+    <div className="p-6 md:p-12 max-w-6xl mx-auto space-y-10">
+      
+      {/* Header */}
+      <div className="flex items-center gap-4">
         <div className="bg-amber-500/20 p-3 rounded-xl">
           <Trophy className="w-8 h-8 text-amber-400" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold">Gamification & Goals</h1>
-          <p className="text-slate-400">Level up your sustainability journey.</p>
+          <h1 className="text-3xl font-bold">Gamification & Community Leaderboard</h1>
+          <p className="text-slate-400">Complete challenges, improve your score, and rise up the rankings.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center flex flex-col items-center justify-center">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column: User Status */}
+        <div className="lg:col-span-1 bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 text-center flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="absolute -top-10 -left-10 w-24 h-24 bg-amber-500/5 rounded-full blur-2xl"></div>
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-4 shadow-lg shadow-orange-500/20">
-            <span className="text-3xl font-black text-white">{score}</span>
+            <Trophy className="w-10 h-10 text-white" />
           </div>
-          <h2 className="text-2xl font-bold">{name}</h2>
-          <p className="text-emerald-400 font-semibold">{level}</p>
+          <h2 className="text-2xl font-bold text-white">{isLoggedIn && name ? name : 'Eco Guest'}</h2>
+          <p className="text-emerald-400 font-semibold mt-1">{level}</p>
+          <div className="text-5xl font-black text-white mt-4">{score} <span className="text-lg text-slate-500">XP</span></div>
         </div>
 
-        <div className="md:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Flame className="text-orange-500" /> Active Challenges
+        {/* Right Columns: Leaderboard Table */}
+        <div className="lg:col-span-2 bg-slate-900/40 border border-slate-800/80 rounded-3xl p-6 shadow-xl">
+          <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <Star className="text-amber-400 w-5 h-5 fill-amber-400" /> Global Standings
           </h2>
-          <div className="space-y-4">
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-lg">Zero Emission Commute</h3>
-                <p className="text-sm text-slate-400">Use bike or walk to work 3 times this week.</p>
-              </div>
-              <div className="text-right">
-                <span className="text-emerald-400 font-bold block">1 / 3 Days</span>
-                <span className="text-xs text-slate-500">+50 XP</span>
-              </div>
-            </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex justify-between items-center">
-              <div>
-                <h3 className="font-bold text-lg">Energy Vampire Slayer</h3>
-                <p className="text-sm text-slate-400">Unplug all inactive appliances for 5 days.</p>
-              </div>
-              <div className="text-right">
-                <span className="text-emerald-400 font-bold block">Completed</span>
-                <span className="text-xs text-slate-500">+100 XP</span>
-              </div>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 text-xs font-semibold uppercase tracking-wider">
+                  <th className="pb-3 pl-2">Rank</th>
+                  <th className="pb-3">User</th>
+                  <th className="pb-3">Score (XP)</th>
+                  <th className="pb-3">Level</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mockLeaderboard.map((user, idx) => (
+                  <tr 
+                    key={idx} 
+                    className={`border-b border-slate-850 hover:bg-slate-800/20 transition-colors ${
+                      user.isCurrentUser ? 'bg-emerald-500/10 text-emerald-400 font-bold border-l-4 border-l-emerald-500' : 'text-slate-300'
+                    }`}
+                  >
+                    <td className="py-4 pl-3">
+                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                    </td>
+                    <td className="py-4 font-semibold">{user.username}</td>
+                    <td className="py-4">{user.score} XP</td>
+                    <td className="py-4 text-xs">
+                      <span className={`px-2.5 py-1 rounded-full font-bold ${
+                        user.level === 'Climate Champion' ? 'bg-emerald-500/10 text-emerald-400' :
+                        user.level === 'Eco Advocate' ? 'bg-blue-500/10 text-blue-400' : 'bg-slate-700/20 text-slate-400'
+                      }`}>
+                        {user.level}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div className="md:col-span-3 bg-slate-900 border border-slate-800 rounded-2xl p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Medal className="text-blue-400" /> Achievement Badges
-          </h2>
-          <div className="flex gap-4 overflow-x-auto pb-2">
-            {[1,2,3,4,5].map(i => (
-              <div key={i} className="flex-shrink-0 w-32 h-32 bg-slate-950 rounded-xl border border-slate-800 flex flex-col items-center justify-center gap-2">
-                <div className={`w-12 h-12 rounded-full ${i <= 2 ? 'bg-emerald-500' : 'bg-slate-800 grayscale'} flex items-center justify-center`}>
-                  <Target className="text-white" />
-                </div>
-                <span className="text-xs font-bold text-center px-2">
-                  {i === 1 ? 'Early Adopter' : i === 2 ? 'Tree Hugger' : 'Locked Badge'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

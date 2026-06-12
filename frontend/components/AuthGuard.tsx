@@ -4,13 +4,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useStore();
+  const { isLoggedIn, hasCalculated } = useStore();
   const router = useRouter();
   const pathname = usePathname();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check auth state on mount/change
     if (!isLoggedIn) {
       if (pathname !== '/login' && pathname !== '/') {
         router.push('/login');
@@ -18,15 +17,24 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         setLoading(false);
       }
     } else {
-      if (pathname === '/login' || pathname === '/') {
-        router.push('/dashboard');
+      // User is logged in
+      if (!hasCalculated) {
+        if (pathname !== '/calculator') {
+          router.push('/calculator');
+        } else {
+          setLoading(false);
+        }
       } else {
-        setLoading(false);
+        // User has already calculated footprint
+        if (pathname === '/login' || pathname === '/' || pathname === '/calculator') {
+          router.push('/dashboard');
+        } else {
+          setLoading(false);
+        }
       }
     }
-  }, [isLoggedIn, pathname, router]);
+  }, [isLoggedIn, hasCalculated, pathname, router]);
 
-  // Prevent flicker of protected content before redirect
   if (loading && pathname !== '/login' && pathname !== '/') {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">

@@ -1,13 +1,33 @@
 'use client';
+import { useState } from 'react';
 import { useStore } from '@/store/useStore';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, Cell } from 'recharts';
-import { Bot, Target, Flame, ArrowRight, ShieldCheck, TrendingDown } from 'lucide-react';
+import { Bot, Target, Flame, ArrowRight, ShieldCheck, TrendingDown, CheckSquare, Square } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { footprintData, score, isLoggedIn, name } = useStore();
-  const total = footprintData.transport + footprintData.energy + footprintData.diet + footprintData.shopping;
+  const { footprintData, score, addPoints, isLoggedIn, name } = useStore();
+  const total = footprintData.transport + footprintData.energy + footprintData.diet + footprintData.habits;
 
-  // Mock historical carbon dataset for Recharts area graph
+  // Monthly tasks state
+  const [tasks, setTasks] = useState([
+    { id: 1, text: 'Switch home bulbs to LEDs', points: 10, completed: false },
+    { id: 2, text: 'Commute by cycling 3 times', points: 15, completed: false },
+    { id: 3, text: 'Unplug idle chargers weekly', points: 5, completed: false },
+  ]);
+
+  const toggleTask = (id: number) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const nextState = !t.completed;
+        // Adjust points in Zustand store
+        addPoints(nextState ? t.points : -t.points);
+        return { ...t, completed: nextState };
+      }
+      return t;
+    }));
+  };
+
+  // Dataset for Recharts area graph
   const chartData = [
     { name: 'Jan', co2: total * 1.2 },
     { name: 'Feb', co2: total * 1.15 },
@@ -22,11 +42,12 @@ export default function DashboardPage() {
     { name: 'Transport', value: footprintData.transport, color: '#3b82f6' },
     { name: 'Energy', value: footprintData.energy, color: '#f59e0b' },
     { name: 'Diet', value: footprintData.diet, color: '#10b981' },
-    { name: 'Shopping', value: footprintData.shopping, color: '#8b5cf6' },
+    { name: 'Habits', value: footprintData.habits, color: '#8b5cf6' },
   ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12">
+      
       {/* Header */}
       <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
         <div>
@@ -46,12 +67,11 @@ export default function DashboardPage() {
       {/* Main Grid Layout */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Columns (Visual Analytics & Coach) */}
+        {/* Left Columns */}
         <div className="lg:col-span-2 space-y-8">
           
           {/* Key Metrics Hub */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            
             <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all">
               <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
               <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Sustainability Score</h3>
@@ -73,7 +93,6 @@ export default function DashboardPage() {
                 <TrendingDown className="w-4 h-4 text-emerald-400" /> -4.2% reduction from last month
               </p>
             </div>
-
           </div>
 
           {/* Dynamic Recharts Trend Chart */}
@@ -99,9 +118,36 @@ export default function DashboardPage() {
 
         </div>
 
-        {/* Right Column (Breakdown & Recommendations) */}
+        {/* Right Column */}
         <div className="space-y-8">
           
+          {/* Monthly Goals Section */}
+          <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <Target className="text-emerald-400 w-5 h-5" /> Monthly Goals & Tasks
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">Check off active goals to gain sustainability points instantly.</p>
+            <div className="space-y-3">
+              {tasks.map(task => (
+                <button
+                  key={task.id}
+                  onClick={() => toggleTask(task.id)}
+                  className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between ${
+                    task.completed 
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300' 
+                      : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                  }`}
+                >
+                  <span className="text-sm font-semibold">{task.text}</span>
+                  <span className="flex items-center gap-1.5 text-xs font-bold">
+                    {task.completed ? <CheckSquare className="w-5 h-5 text-emerald-400" /> : <Square className="w-5 h-5 text-slate-500" />}
+                    +{task.points} XP
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Recharts Bar Breakdown */}
           <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl">
             <h3 className="text-lg font-bold text-white mb-6">Emissions Breakdown</h3>
@@ -117,30 +163,6 @@ export default function DashboardPage() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* AI Recommendations */}
-          <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-              <Bot className="text-emerald-400" /> Active Recommendations
-            </h3>
-            <div className="space-y-4">
-              <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 flex justify-between items-center group cursor-pointer hover:border-emerald-500/40 transition-colors">
-                <div>
-                  <h4 className="font-bold text-sm">Lower Home Thermostat</h4>
-                  <p className="text-xs text-slate-400 mt-1">Saves up to 15 kg CO₂ weekly</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
-              </div>
-
-              <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 flex justify-between items-center group cursor-pointer hover:border-blue-500/40 transition-colors">
-                <div>
-                  <h4 className="font-bold text-sm">Switch to Electric Commute</h4>
-                  <p className="text-xs text-slate-400 mt-1">Saves up to 25 kg CO₂ weekly</p>
-                </div>
-                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
-              </div>
             </div>
           </div>
 
