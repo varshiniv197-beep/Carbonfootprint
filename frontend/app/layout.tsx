@@ -1,5 +1,6 @@
 import './globals.css';
 import { Navigation } from '@/components/Navigation';
+import { AuthGuard } from '@/components/AuthGuard';
 
 export const metadata = {
   title: 'TerraSync AI+',
@@ -14,10 +15,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
-        <Navigation />
-        <main className="flex-1">
-          {children}
-        </main>
+        <AuthGuard>
+          <Navigation />
+          <main className="flex-1">
+            {children}
+          </main>
+        </AuthGuard>
       </body>
     </html>
   );
