@@ -55,18 +55,18 @@ export default function LoginPage() {
       }
       
       const hashedPassword = await hashPassword(cleanPassword);
-      const success = await register(cleanUsername, hashedPassword);
-      if (!success) {
-        setError('Username already exists.');
+      const res = await register(cleanUsername, hashedPassword);
+      if (!res.success) {
+        setError(res.error || 'Registration failed.');
         setLoading(false);
         return;
       }
       router.push('/calculator');
     } else {
       const hashedPassword = await hashPassword(cleanPassword);
-      const success = await login(cleanUsername, hashedPassword);
-      if (!success) {
-        setError('Invalid credentials.');
+      const res = await login(cleanUsername, hashedPassword);
+      if (!res.success) {
+        setError(res.error || 'Invalid credentials.');
         setLoading(false);
         return;
       }

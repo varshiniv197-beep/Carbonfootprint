@@ -18,8 +18,8 @@ interface UserState {
   hasCalculated: boolean;
   setFootprintData: (data: Partial<FootprintData>) => Promise<void>;
   addPoints: (points: number) => void;
-  login: (name: string, passwordHash: string) => Promise<boolean>;
-  register: (name: string, passwordHash: string) => Promise<boolean>;
+  login: (name: string, passwordHash: string) => Promise<{ success: boolean; error?: string }>;
+  register: (name: string, passwordHash: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
   completeCalculator: () => Promise<void>;
 }
@@ -60,7 +60,6 @@ export const useStore = create<UserState>()(
           level: newLevel
         });
 
-        // Sync to MongoDB serverless API with local DB fallback
         if (state.isLoggedIn && state.name) {
           try {
             const res = await fetch('/api/footprint', {
@@ -70,7 +69,7 @@ export const useStore = create<UserState>()(
             });
             if (!res.ok) throw new Error('API Sync failed');
           } catch (e) {
-            // Fallback to local DB
+            // Fallback to local DB cache
             const user = findUser(state.name);
             if (user) {
               user.footprintData = newData;
@@ -93,6 +92,7 @@ export const useStore = create<UserState>()(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: name, password: passwordHash })
           });
+          
           if (res.ok) {
             const data = await res.json();
             set({
@@ -102,10 +102,13 @@ export const useStore = create<UserState>()(
               footprintData: data.footprintData,
               score: data.score
             });
-            return true;
+            return { success: true };
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            return { success: false, error: errData.error || 'Authentication failed' };
           }
         } catch (e) {
-          // Fallback to local DB
+          // Network failure: Fallback to local DB cache
           const user = findUser(name);
           if (user && user.passwordHash === passwordHash) {
             set({
@@ -115,10 +118,10 @@ export const useStore = create<UserState>()(
               footprintData: user.footprintData,
               score: user.score
             });
-            return true;
+            return { success: true };
           }
+          return { success: false, error: 'Database Connection Error. Offline mode failed.' };
         }
-        return false;
       },
 
       register: async (name, passwordHash) => {
@@ -128,6 +131,7 @@ export const useStore = create<UserState>()(
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: name, password: passwordHash })
           });
+
           if (res.ok) {
             set({
               isLoggedIn: true,
@@ -137,10 +141,13 @@ export const useStore = create<UserState>()(
               score: 0,
               level: 'Novice'
             });
-            return true;
+            return { success: true };
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            return { success: false, error: errData.error || 'Registration failed' };
           }
         } catch (e) {
-          // Fallback to local DB
+          // Network failure: Fallback to local DB cache
           const existing = findUser(name);
           if (!existing) {
             const newUser: UserAccount = {
@@ -159,10 +166,10 @@ export const useStore = create<UserState>()(
               score: 0,
               level: 'Novice'
             });
-            return true;
+            return { success: true };
           }
+          return { success: false, error: 'Username already exists in offline database.' };
         }
-        return false;
       },
 
       logout: () =>
@@ -187,7 +194,6 @@ export const useStore = create<UserState>()(
               body: JSON.stringify({ username: state.name, footprintData: state.footprintData, score: state.score })
             });
           } catch (e) {
-            // Fallback to local DB
             const user = findUser(state.name);
             if (user) {
               user.hasCalculated = true;
