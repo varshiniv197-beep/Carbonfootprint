@@ -13,8 +13,11 @@ interface UserState {
   score: number;
   level: string;
   footprintData: FootprintData;
+  isLoggedIn: boolean;
   setFootprintData: (data: Partial<FootprintData>) => void;
   addPoints: (points: number) => void;
+  login: (name: string) => void;
+  logout: () => void;
 }
 
 export const useStore = create<UserState>()(
@@ -29,6 +32,7 @@ export const useStore = create<UserState>()(
         diet: 30,
         shopping: 20,
       },
+      isLoggedIn: false,
       setFootprintData: (data) =>
         set((state) => ({
           footprintData: { ...state.footprintData, ...data },
@@ -37,6 +41,8 @@ export const useStore = create<UserState>()(
         set((state) => ({
           score: Math.min(100, state.score + points),
         })),
+      login: (name) => set({ isLoggedIn: true, name }),
+      logout: () => set({ isLoggedIn: false }),
     }),
     {
       name: 'terrasync-storage',

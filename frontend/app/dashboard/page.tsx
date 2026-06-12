@@ -1,96 +1,151 @@
 'use client';
 import { useStore } from '@/store/useStore';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, BarChart, Bar, Cell } from 'recharts';
+import { Bot, Target, Flame, ArrowRight, ShieldCheck, TrendingDown } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { footprintData, score } = useStore();
+  const { footprintData, score, isLoggedIn, name } = useStore();
   const total = footprintData.transport + footprintData.energy + footprintData.diet + footprintData.shopping;
 
+  // Mock historical carbon dataset for Recharts area graph
+  const chartData = [
+    { name: 'Jan', co2: total * 1.2 },
+    { name: 'Feb', co2: total * 1.15 },
+    { name: 'Mar', co2: total * 1.1 },
+    { name: 'Apr', co2: total * 1.05 },
+    { name: 'May', co2: total * 1.02 },
+    { name: 'Jun', co2: total },
+  ];
+
+  // Bar chart breakdown
+  const barData = [
+    { name: 'Transport', value: footprintData.transport, color: '#3b82f6' },
+    { name: 'Energy', value: footprintData.energy, color: '#f59e0b' },
+    { name: 'Diet', value: footprintData.diet, color: '#10b981' },
+    { name: 'Shopping', value: footprintData.shopping, color: '#8b5cf6' },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans p-6 md:p-12">
+    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 md:p-12">
       {/* Header */}
-      <header className="flex justify-between items-center mb-10">
+      <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
         <div>
-          <h1 className="text-4xl font-extrabold text-white flex items-center gap-3">
-            Dashboard
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+            Carbon Intelligence Hub
           </h1>
-          <p className="text-slate-400 mt-2">Welcome back to TerraSync AI+</p>
+          <p className="text-slate-400 mt-2">
+            Welcome back, <span className="text-white font-semibold">{isLoggedIn ? name : 'Eco Guest'}</span>. Here is your sustainability analysis.
+          </p>
         </div>
-        <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-full font-medium">
-          Status: Active & Optimizing
+        
+        <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-2xl text-sm font-semibold">
+          <ShieldCheck className="w-4 h-4" /> Secure Session Verified
         </div>
       </header>
 
-      {/* Main Dashboard Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* Main Grid Layout */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Left Column: AI Coach */}
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
-            <h2 className="text-2xl font-bold text-white mb-4">🤖 AI Sustainability Coach</h2>
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-700 mb-4 h-48 overflow-y-auto space-y-4">
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-white">AI</div>
-                <div className="bg-slate-700 rounded-xl rounded-tl-none p-3 text-sm text-slate-200">
-                  Welcome to TerraSync! Your current emissions are trending safely. I noticed your energy usage ({footprintData.energy} kWh) is the biggest factor right now.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Gamification Hub */}
+        {/* Left Columns (Visual Analytics & Coach) */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Key Metrics Hub */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl flex flex-col justify-center items-center text-center">
-              <h2 className="text-xl font-bold text-white mb-2">Sustainability Score</h2>
-              <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 my-2">{score} / 100</div>
-              <p className="text-xs text-slate-400 mt-2">Top 15% of TerraSync users globally</p>
-            </div>
             
-            <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl flex flex-col justify-center items-center text-center">
-               <h2 className="text-xl font-bold text-white mb-2">Total Footprint</h2>
-              <div className="text-4xl font-black text-white my-2">{total.toFixed(1)} <span className="text-sm text-slate-400">kg CO₂</span></div>
-              <p className="text-xs text-slate-400 mt-2">Calculated this week</p>
+            <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/30 transition-all">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Sustainability Score</h3>
+              <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 my-4">
+                {score} <span className="text-xl text-slate-500">/ 100</span>
+              </div>
+              <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                <Flame className="w-4 h-4 text-orange-500" /> Top 15% of global performers
+              </p>
+            </div>
+
+            <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl relative overflow-hidden group hover:border-cyan-500/30 transition-all">
+              <div className="absolute -top-10 -right-10 w-24 h-24 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors"></div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400">Total Footprint</h3>
+              <div className="text-5xl font-black text-white my-4">
+                {total.toFixed(1)} <span className="text-lg text-slate-500">kg CO₂</span>
+              </div>
+              <p className="text-xs text-slate-400 flex items-center gap-1.5">
+                <TrendingDown className="w-4 h-4 text-emerald-400" /> -4.2% reduction from last month
+              </p>
+            </div>
+
+          </div>
+
+          {/* Dynamic Recharts Trend Chart */}
+          <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-6">Emissions Trend Projection</h3>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorCo2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }} />
+                  <Area type="monotone" dataKey="co2" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorCo2)" />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
+
         </div>
 
-        {/* Right Column: Analytics & Budgets */}
-        <div className="space-y-6">
-          <div className="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
-            <h2 className="text-xl font-bold text-white mb-4">📊 Carbon Budget Breakdown</h2>
-            
+        {/* Right Column (Breakdown & Recommendations) */}
+        <div className="space-y-8">
+          
+          {/* Recharts Bar Breakdown */}
+          <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-6">Emissions Breakdown</h3>
+            <div className="h-48 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barData}>
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }} />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {barData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* AI Recommendations */}
+          <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-3xl p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+              <Bot className="text-emerald-400" /> Active Recommendations
+            </h3>
             <div className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-slate-300">Transportation</span>
-                  <span className="text-emerald-400 font-bold">{footprintData.transport.toFixed(1)} kg</span>
+              <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 flex justify-between items-center group cursor-pointer hover:border-emerald-500/40 transition-colors">
+                <div>
+                  <h4 className="font-bold text-sm">Lower Home Thermostat</h4>
+                  <p className="text-xs text-slate-400 mt-1">Saves up to 15 kg CO₂ weekly</p>
                 </div>
-                <div className="w-full bg-slate-900 rounded-full h-2.5">
-                  <div className="bg-blue-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, footprintData.transport)}%` }}></div>
-                </div>
+                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
               </div>
-              
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-slate-300">Home Energy</span>
-                  <span className="text-amber-400 font-bold">{footprintData.energy.toFixed(1)} kg</span>
+
+              <div className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 flex justify-between items-center group cursor-pointer hover:border-blue-500/40 transition-colors">
+                <div>
+                  <h4 className="font-bold text-sm">Switch to Electric Commute</h4>
+                  <p className="text-xs text-slate-400 mt-1">Saves up to 25 kg CO₂ weekly</p>
                 </div>
-                <div className="w-full bg-slate-900 rounded-full h-2.5">
-                  <div className="bg-amber-400 h-2.5 rounded-full" style={{ width: `${Math.min(100, footprintData.energy)}%` }}></div>
-                </div>
-              </div>
-              
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-slate-300">Diet & Food</span>
-                  <span className="text-emerald-400 font-bold">{footprintData.diet.toFixed(1)} kg</span>
-                </div>
-                <div className="w-full bg-slate-900 rounded-full h-2.5">
-                  <div className="bg-emerald-500 h-2.5 rounded-full" style={{ width: `${Math.min(100, footprintData.diet)}%` }}></div>
-                </div>
+                <ArrowRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>
           </div>
+
         </div>
+
       </div>
     </div>
   );
