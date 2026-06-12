@@ -1,3 +1,10 @@
+import './globals.css';
+
+export const metadata = {
+  title: 'TerraSync AI',
+  description: 'Your Smart Sustainability Assistant',
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -5,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="bg-brand-dark text-slate-100 font-sans antialiased">{children}</body>
     </html>
   );
 }
